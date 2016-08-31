@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+message CommandPacket {
+    required float NormalizedVoltage = 1;
+    required float SecondCommand = 2;
+}
+
+message TelemetryPacket {
+    required float Position = 1;
+    required float Velocity = 2;
+    required float NewTelemetry = 3;
+}

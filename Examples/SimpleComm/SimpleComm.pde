@@ -1,9 +1,13 @@
 #include <ProtobuffSerial.h>
 
 ProtobuffSerial serialComm;//initialize an instance of the class
+unsigned long delayTime = 100;
 
-void setup(){/*nothing to setup*/}
+void setup(){
+  serialComm.InitHw();
+}
 
 void loop(){
-  serialComm.blink(200);//stay one second on, then a second off
+  serialComm.RunComm();
+  delay(delayTime)
 }
