@@ -32,3 +32,23 @@ You have not yet auto-generated your comm packet interface code. To do that run 
 cd arduino-1.6.11/libraries/Examples/SimpleComm
 make
 ```
+
+If you get this error:
+
+```
+         *************************************************************
+         *** Could not import the Google protobuf Python libraries ***
+         *** Try installing package 'python-protobuf' or similar.  ***
+         *************************************************************
+```
+ 
+ You will need to install the python libraries for protobuff 2.5.0. See [here](https://github.com/google/protobuf/releases/tag/v2.5.0) 
+ 
+ Download and then follow instructions to setup. Then do the following:
+ 
+ ```
+cd protobuf-2.5.0/python
+python setup.py install
+```
+ 
+
