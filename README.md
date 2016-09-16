@@ -4,11 +4,11 @@ This is an Arduino library that utilizes Google's protocol buffers in order to i
 ---
 ### Getting started
 The easiest way to get started with using this library is to first build and run the example sketches. But before you do that,
-you must install the library. To do that, clone/download this repository to your Arduino Libraries folder:
+you must install the library. To do that, clone/download this repository to your Arduino Libraries folder. On Linux you can just do something like the following:
 
 ```
 cd arduino-1.6.11/libraries
-git clone 
+git clone https://github.com/mike-moore/ProtobuffSerial.git
 ```
 
 
