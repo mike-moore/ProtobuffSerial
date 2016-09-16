@@ -14,3 +14,21 @@ git clone https://github.com/mike-moore/ProtobuffSerial.git
 ```
 
 
+
+
+If you get the following error:
+
+```
+...
+ProtobuffSerial/MicroCommChannel.h:19:28: fatal error: comm_packet.pb.h: No such file or directory
+ #include "comm_packet.pb.h"
+                            ^
+compilation terminated.
+exit status 1
+```
+
+You have not yet auto-generated your comm packet interface code. To do that run the following commands:
+```
+cd arduino-1.6.11/libraries/Examples/SimpleComm
+make
+```
