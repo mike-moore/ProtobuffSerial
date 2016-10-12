@@ -24,7 +24,7 @@
 ///       dynamic allocation. It can be adjusted to meet
 ///       your specific needs
 ////////////////////////////////////////////////////////////
-#define COMM_MAX_BUFF_SIZE 255
+#define COMM_MAX_BUFF_SIZE 100
 
 ///////////////////////////////////////////////////////////////
 /// @class MicroCommChannel

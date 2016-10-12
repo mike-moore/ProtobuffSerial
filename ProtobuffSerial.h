@@ -21,7 +21,7 @@
 /// @ingroup Communication
 /// @brief TODO
 ///////////////////////////////////////////////////////////////
-class ProtobuffSerial { 
+class ProtobuffSerial : public MicroCommChannel { 
  public:
   ProtobuffSerial();
   ~ProtobuffSerial();
