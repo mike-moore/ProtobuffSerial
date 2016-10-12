@@ -150,8 +150,8 @@ bool MicroCommChannel::ValidCrc(){
     /// - Unload the CRC32 that was sent over the wire.
     uint32_t rcvd_crc32 = 0;
     uint_least8_t crcStartIndx = 4 + CommandPacket_size;
-    rcvd_crc32 |= RxBuffer[crcStartIndx+3] << 24;
-    rcvd_crc32 |= RxBuffer[crcStartIndx+2] << 16;
+    rcvd_crc32 |= (unsigned long) RxBuffer[crcStartIndx+3] << 24;
+    rcvd_crc32 |= (unsigned long) RxBuffer[crcStartIndx+2] << 16;
     rcvd_crc32 |= RxBuffer[crcStartIndx+1] << 8;
     rcvd_crc32 |= RxBuffer[crcStartIndx];
     /// - Check received CRC with what was computed

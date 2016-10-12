@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////
 ///  This file defines a class that is used for testing
-///  the Chupacabra SCI interface.
+///  the serial interface.
 ///
 /// @author
 ///         $Author: Mike Moore $
@@ -31,7 +31,7 @@ class FriendlyExampleMicroComm : public MicroCommChannel{
   friend class ExampleMicroComm_Test;
   //////////////////////////////////////////////////////////
   /// @brief Mock implementations used to emulate what the 
-  ///        Chup SCI HW would do. This is done in order to
+  ///        device serial HW would do. This is done in order to
   ///        fully test all of the state transitions in 
   ///        RunComm.
   //////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ class FriendlyExampleMicroComm : public MicroCommChannel{
   virtual bool ReadBytesAvailable();
   virtual int ReadPacket();
   virtual int WritePacket();
-  void WriteToChup(uint8_t* txBuff, int buffStartIndx, int numBytes);
+  void WriteToDevice(uint8_t* txBuff, int buffStartIndx, int numBytes);
   void ReadCommands();
   void FailHeader();
   CommandPacket TestCommands;

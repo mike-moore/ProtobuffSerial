@@ -9,5 +9,5 @@ void setup(){
 
 void loop(){
   serialComm.RunComm();
-  delay(delayTime)
+  delay(delayTime);
 }

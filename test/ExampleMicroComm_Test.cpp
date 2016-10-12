@@ -121,9 +121,9 @@ bool FriendlyExampleMicroComm::ReadBytesAvailable(){
 }
 
 int FriendlyExampleMicroComm::ReadPacket(){
-    /// - Emulate commands being sent from the PC side and the Chup
+    /// - Emulate commands being sent from the PC side and the device
     ///   reading them in. This function call populates the RxBuffer 
-    ///   just like how the real ReadPacket function on the Chup side
+    ///   just like how the real ReadPacket function on the device side
     ///   will work.
     ReadCommands();
     if (FailRx){
@@ -139,7 +139,7 @@ int FriendlyExampleMicroComm::WritePacket(){
     return MicroCommChannel::TX_PACKET_SUCCESS;
 }
 
-void FriendlyExampleMicroComm::WriteToChup(uint8_t* txBuff, int buffStartIndx, int numBytes){
+void FriendlyExampleMicroComm::WriteToDevice(uint8_t* txBuff, int buffStartIndx, int numBytes){
     for(uint8_t indx = 0; indx < numBytes; indx++)
     {
         RxBuffer[indx+buffStartIndx] = txBuff[indx];
@@ -148,7 +148,7 @@ void FriendlyExampleMicroComm::WriteToChup(uint8_t* txBuff, int buffStartIndx, i
 
 void FriendlyExampleMicroComm::ReadCommands(){
     /// - Emulate sending down the header
-    WriteToChup(PacketHeader, 0, 4);
+    WriteToDevice(PacketHeader, 0, 4);
     /// - Encode the commands
     uint8_t txBuff[COMM_MAX_BUFF_SIZE];
     pb_ostream_t outstream = pb_ostream_from_buffer(txBuff, sizeof(txBuff));
@@ -157,7 +157,7 @@ void FriendlyExampleMicroComm::ReadCommands(){
         FAIL() << "Failed to encode the command packet";
     }
     /// - Emulate sending down the commands
-    WriteToChup(txBuff, 4, CommandPacket_size);
+    WriteToDevice(txBuff, 4, CommandPacket_size);
     /// - Compute the CRC32
     uint32_t computed_crc32 = CommCrc32::crc32(txBuff, CommandPacket_size, 0);
     /// - Pack the computed CRC as 4 bytes
@@ -167,7 +167,7 @@ void FriendlyExampleMicroComm::ReadCommands(){
     crcBytes[2] = (computed_crc32 & 0x00ff0000) >> 16;
     crcBytes[3] = (computed_crc32 & 0xff000000) >> 24;
     /// - Emulate sending down the CRC32
-    WriteToChup(crcBytes, 4 + CommandPacket_size, 4);
+    WriteToDevice(crcBytes, 4 + CommandPacket_size, 4);
 }
 
 void FriendlyExampleMicroComm::FailHeader(){

@@ -75,14 +75,14 @@ class MicroCommChannel_Test : public testing::Test{
   bool ValidCrc(unsigned char * rcvdData);
   ////////////////////////////////////////////////////////////
   /// @brief Helper function that emulates writing to the
-  ///        Chup by directly setting the RxBuffer.
+  ///        device by directly setting the RxBuffer.
   ////////////////////////////////////////////////////////////
-  void WriteToChup(uint8_t* txBuff, int buffStartIndx, int numBytes);
+  void WriteToDevice(uint8_t* txBuff, int buffStartIndx, int numBytes);
   ////////////////////////////////////////////////////////////
   /// @brief Helper function that emulates reading from the
-  ///        Chup by reading directly from the Tx buffer.
+  ///        device by reading directly from the Tx buffer.
   ////////////////////////////////////////////////////////////
-  void ReadFromChup(uint8_t* rxBuff, int buffStartIndx, int numBytes);
+  void ReadFromDevice(uint8_t* rxBuff, int buffStartIndx, int numBytes);
   ////////////////////////////////////////////////////////////
   /// @brief Helper function that writes commands to the 
   ///        serial channel.
@@ -104,7 +104,7 @@ class MicroCommChannel_Test : public testing::Test{
   TelemetryPacket TestTelemetry;
   ////////////////////////////////////////////////////////////
   /// @brief Header placed on command packets sent to the 
-  ///        Chup. Constant value used is SOE!
+  ///        device. Constant value used is SOE!
   ///        in hex : 0x534F4521
   ///        in dec : 1397703969
   ////////////////////////////////////////////////////////////

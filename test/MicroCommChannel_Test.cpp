@@ -39,7 +39,7 @@ TEST_F(MicroCommChannel_Test, nominalEncode){
     /// - Transmit the packet.
 	ASSERT_TRUE(TestArticle.Encode());
 	ReadTelemetry();
-    /// -  Check that everything worked. The Chup telemetry values
+    /// -  Check that everything worked. The telemetry values
     ///    set above should now be read in to the test telemetry 
     ///    packet.
 	ASSERT_NEAR(TestArticle.Telemetry.Position, TestTelemetry.Position, Tolerance);
@@ -59,14 +59,14 @@ TEST_F(MicroCommChannel_Test, nominalRx){
     ASSERT_NEAR(TestArticle.Commands.NormalizedVoltage, TestCommands.NormalizedVoltage, Tolerance);
 }
 
-void MicroCommChannel_Test::WriteToChup(uint8_t* txBuff, int buffStartIndx, int numBytes){
+void MicroCommChannel_Test::WriteToDevice(uint8_t* txBuff, int buffStartIndx, int numBytes){
 	for(uint8_t indx = 0; indx < numBytes; indx++)
 	{
 		TestArticle.RxBuffer[indx+buffStartIndx] = txBuff[indx];
 	}
 }
 
-void MicroCommChannel_Test::ReadFromChup(uint8_t* rxBuff, int buffStartIndx, int numBytes){
+void MicroCommChannel_Test::ReadFromDevice(uint8_t* rxBuff, int buffStartIndx, int numBytes){
 	for(uint8_t indx = 0; indx < numBytes; indx++)
 	{
 		rxBuff[indx] = TestArticle.TxBuffer[indx+buffStartIndx];
@@ -76,7 +76,7 @@ void MicroCommChannel_Test::ReadFromChup(uint8_t* rxBuff, int buffStartIndx, int
 bool MicroCommChannel_Test::ValidHeader(){
     /// - Emulate reading in the four byte header
     uint8_t rxBuffer[4];
-    ReadFromChup(rxBuffer, 0, 4);
+    ReadFromDevice(rxBuffer, 0, 4);
     /// - Check that the received header is valid.
    	return rxBuffer[0] == 0x21 &&
   	       rxBuffer[1] == 0x45 &&
@@ -85,9 +85,9 @@ bool MicroCommChannel_Test::ValidHeader(){
 }
 
 bool MicroCommChannel_Test::ValidCrc(uint8_t * rcvdData){
-    /// - Emulate reading in the CRC32
+    /// - Emulate reading in the CRC
     uint8_t rxCrc[COMM_MAX_BUFF_SIZE];
-    ReadFromChup(rxCrc, 4+TelemetryPacket_size, 4);
+    ReadFromDevice(rxCrc, 4+TelemetryPacket_size, 4);
     uint32_t rcvd_crc32 = 0;
     rcvd_crc32 |= rxCrc[3] << 24;
     rcvd_crc32 |= rxCrc[2] << 16;
@@ -106,7 +106,7 @@ void MicroCommChannel_Test::ReadTelemetry(){
         FAIL() << "Invalid telemetry packet was sent. Bad header.";
     /// - Emulate reading in the telemetry packet on the PC side.
     uint8_t rxBuffer[COMM_MAX_BUFF_SIZE];
-    ReadFromChup(rxBuffer, 4, TelemetryPacket_size);
+    ReadFromDevice(rxBuffer, 4, TelemetryPacket_size);
     pb_istream_t stream = pb_istream_from_buffer(rxBuffer, TelemetryPacket_size);
     if (!pb_decode(&stream, TelemetryPacket_fields, &TestTelemetry))
     {
@@ -119,7 +119,7 @@ void MicroCommChannel_Test::ReadTelemetry(){
 
 void MicroCommChannel_Test::WriteCommands(){
 	/// - Emulate sending down the header
-	WriteToChup(PacketHeader, 0, 4);
+	WriteToDevice(PacketHeader, 0, 4);
 	/// - Encode the commands
 	uint8_t txBuff[COMM_MAX_BUFF_SIZE];
     pb_ostream_t outstream = pb_ostream_from_buffer(txBuff, sizeof(txBuff));
@@ -128,7 +128,7 @@ void MicroCommChannel_Test::WriteCommands(){
         FAIL() << "Failed to encode the command packet";
     }
 	/// - Emulate sending down the commands
-	WriteToChup(txBuff, 4, CommandPacket_size);
+	WriteToDevice(txBuff, 4, CommandPacket_size);
 	/// - Compute the CRC32
     uint32_t computed_crc32 = CommCrc32::crc32(txBuff, CommandPacket_size, 0);
 	/// - Pack the computed CRC as 4 bytes
@@ -138,6 +138,6 @@ void MicroCommChannel_Test::WriteCommands(){
 	crcBytes[2] = (computed_crc32 & 0x00ff0000) >> 16;
 	crcBytes[3] = (computed_crc32 & 0xff000000) >> 24;
 	/// - Emulate sending down the CRC32
-    WriteToChup(crcBytes, 4 + CommandPacket_size, 4);
+    WriteToDevice(crcBytes, 4 + CommandPacket_size, 4);
 }
 
