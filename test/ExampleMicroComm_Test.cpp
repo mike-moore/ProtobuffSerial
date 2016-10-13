@@ -52,7 +52,7 @@ TEST_F(ExampleMicroComm_Test, rxBytesFail){
     TestArticle.FailRx = true;
     ASSERT_TRUE(TestArticle.RunComm() == MicroCommChannel::RX_PACKET_FAIL);
     /// - Should transition back to RECEIVING
-    ASSERT_TRUE(TestArticle.CommState() == MicroCommChannel::RECEIVING);
+    ASSERT_TRUE(TestArticle.CommState() == MicroCommChannel::RESETTING_COMM);
 }
 
 TEST_F(ExampleMicroComm_Test, unloadFail){

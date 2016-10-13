@@ -2,16 +2,25 @@
 
 MicroCommChannel::MicroCommChannel()
 {
+    LoopFrequency = (uint_least8_t) 2000;
+    CommFrequency = (uint_least8_t) 250;
+    CommFailureCounter = 0;
     /// - Start off in RECEIVING state.
     ActiveState = RECEIVING;
     PacketHeader = 0x534F4521;
     TxCrc32 = 0x0000;
-    /// - Initialize the buffer to all zeros.
-    for (int indx = 0; indx < COMM_MAX_BUFF_SIZE; indx++)
-    {
-        TxBuffer[indx] = 0x00;
-        RxBuffer[indx] = 0x00;
-    }
+    RxByteCounter = 0;
+    TxByteCounter = 0;
+    CommandPacketNumBytes = CommandPacket_size + 8;
+    ResetNumCycles = 0;
+    /// - Require 8 frames to complete a comm reset.
+    ResetWaitCycles = (LoopFrequency/CommFrequency)*3;
+    CountCmdPacketTransitTime = 0;
+    /// - Compute the maximum time we will wait to received the full cmd packet.
+    uint_least8_t numTransits = (CommandPacketNumBytes / 4);
+    uint_least8_t remainderTransit = (CommandPacketNumBytes % 4 == 0) ? 0: 1;
+    MaxCmdPacketTransitTime = (numTransits+remainderTransit)*(LoopFrequency/CommFrequency);
+    ClearBuffers();
 }
 
 MicroCommChannel::~MicroCommChannel() {
@@ -24,24 +33,27 @@ int MicroCommChannel::RunComm() {
     switch(ActiveState)
     {
         case RECEIVING:
-			rx_status = ReadPacket();
-			if(rx_status == RX_PACKET_READY){
-				ActiveState = TRANSMITTING;
-			}else if (rx_status == RX_READING_PACKET){
-				return RX_READING_PACKET;
-			}else if (rx_status == RX_PACKET_FAIL){
-				return RX_PACKET_FAIL;
-			}
+            rx_status = ReadPacket();
+            if(rx_status == RX_PACKET_READY){
+                ActiveState = TRANSMITTING;
+            }else if (rx_status == RX_READING_PACKET){
+                return RX_READING_PACKET;
+            }else if (rx_status == RX_PACKET_FAIL){
+                ClearBuffersAndReset();
+                return RX_PACKET_FAIL;
+            }
         break;
 
         case TRANSMITTING:
             /// - First, decode the received commands.
             if (!Decode()){
+                ClearBuffersAndReset();
                 ActiveState = RECEIVING;
                 return UNLOAD_FAIL;
             }
             /// - Next, encode the telemetry.
             if (!Encode()){
+                ClearBuffersAndReset();
                 ActiveState = RECEIVING;
                 return LOAD_FAIL;
             }
@@ -51,10 +63,24 @@ int MicroCommChannel::RunComm() {
                 ActiveState = RECEIVING;
                 return SUCCESS;
             }else if(tx_status == TX_PACKET_FAIL){
+                ClearBuffersAndReset();
                 ActiveState = RECEIVING;
                 return TX_PACKET_FAIL;
             }
             ActiveState = RECEIVING;
+        break;
+
+        case RESETTING_COMM:
+            /// Allow time for the comm to reset. This gives time for the
+            /// PC side to also detect the presence of a failure, clear its
+            /// its comm buffers and reset its state.
+            ResetNumCycles++;
+            if (ResetNumCycles >= ResetWaitCycles){
+                ResetNumCycles = 0;
+                CommFailureCounter++;
+                ActiveState = RECEIVING;
+            }
+            return RESETTING;
         break;
 
         default:
@@ -65,7 +91,6 @@ int MicroCommChannel::RunComm() {
     /// - Successful cycle through the comm state machine.
     return SUCCESS;
 }
-
 int MicroCommChannel::InitHw() {
     /// - Derived class needs to implement this routine.
     return HW_INIT_FAIL;
@@ -150,10 +175,25 @@ bool MicroCommChannel::ValidCrc(){
     /// - Unload the CRC32 that was sent over the wire.
     uint32_t rcvd_crc32 = 0;
     uint_least8_t crcStartIndx = 4 + CommandPacket_size;
-    rcvd_crc32 |= (unsigned long) RxBuffer[crcStartIndx+3] << 24;
-    rcvd_crc32 |= (unsigned long) RxBuffer[crcStartIndx+2] << 16;
+    rcvd_crc32 |= RxBuffer[crcStartIndx+3] << 24;
+    rcvd_crc32 |= RxBuffer[crcStartIndx+2] << 16;
     rcvd_crc32 |= RxBuffer[crcStartIndx+1] << 8;
     rcvd_crc32 |= RxBuffer[crcStartIndx];
     /// - Check received CRC with what was computed
     return rcvd_crc32 == computed_crc32;
+}
+
+
+void MicroCommChannel::ClearBuffers(){
+    for (int indx = 0; indx < COMM_MAX_BUFF_SIZE; indx++)
+    {
+        TxBuffer[indx] = 0x00;
+        RxBuffer[indx] = 0x00;
+    }
+}
+
+void MicroCommChannel::ClearBuffersAndReset(){
+    ClearBuffers();
+    RxByteCounter = 0;
+    ActiveState = RESETTING_COMM;
 }

@@ -59,15 +59,17 @@ class MicroCommChannel {
   ////////////////////////////////////////////////////////////
   typedef enum CommStatusCodes
   {
-      TX_PACKET_SUCCESS = 3,
-      RX_PACKET_READY = 2,
-      RX_READING_PACKET = 1,
+      TX_PACKET_SUCCESS = 4,
+      RX_PACKET_READY = 3,
+      RX_READING_PACKET = 2,
+      RX_WAITING_TO_READ = 1,
       SUCCESS = 0,
       HW_INIT_FAIL = -1,
       RX_PACKET_FAIL = -2,
       UNLOAD_FAIL = -3,
       LOAD_FAIL = -4,
-      TX_PACKET_FAIL = -5
+      TX_PACKET_FAIL = -5,
+      RESETTING = -6,
   }CommStatusCode;
   ////////////////////////////////////////////////////////////
   /// @brief Enumerated type to define the list of possible
@@ -76,7 +78,8 @@ class MicroCommChannel {
   typedef enum CommStates
   {
       RECEIVING = 0,
-      TRANSMITTING = 1
+      TRANSMITTING = 1,
+      RESETTING_COMM = 2
   }CommunicationStates;
   ////////////////////////////////////////////////////////////
   /// @brief Returns the current state of the comm system.
@@ -96,6 +99,22 @@ class MicroCommChannel {
   ////////////////////////////////////////////////////////////
   CommandPacket Commands;
   TelemetryPacket Telemetry;
+  ////////////////////////////////////////////////////////////
+  /// @brief Comm loop frequency. This the frequency that the
+  ///        RunComm function is to be called at.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t LoopFrequency;
+  ////////////////////////////////////////////////////////////
+  /// @brief Comm frequency. This the frequency at which the
+  ///        PC side will be sending down 4 byte packets.
+  ///        This must match what's configured on the PC side!
+  ////////////////////////////////////////////////////////////
+  uint_least8_t CommFrequency;
+  ////////////////////////////////////////////////////////////
+  /// @brief Counts the number of times we've encountered a
+  ///        comm failure and had to reset.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t CommFailureCounter;
 
  protected:
   ////////////////////////////////////////////////////////////
@@ -129,6 +148,15 @@ class MicroCommChannel {
   ////////////////////////////////////////////////////////////
   virtual bool ValidCrc();
   ////////////////////////////////////////////////////////////
+  /// @brief Clears the Tx and Rx buffers
+  ////////////////////////////////////////////////////////////
+  virtual void ClearBuffers();
+  ////////////////////////////////////////////////////////////
+  /// @brief Function that handles a comm failure. Buffers are
+  ///        cleared and the comm is reset.
+  ////////////////////////////////////////////////////////////
+  virtual void ClearBuffersAndReset();
+  ////////////////////////////////////////////////////////////
   /// @brief Holds the active state of the comm system.
   ////////////////////////////////////////////////////////////
   CommunicationStates ActiveState;
@@ -148,6 +176,37 @@ class MicroCommChannel {
   /// @brief Tx CRC
   ////////////////////////////////////////////////////////////
   uint32_t TxCrc32;
+  ////////////////////////////////////////////////////////////
+  /// @brief Rx and Tx byte counters
+  ////////////////////////////////////////////////////////////
+  uint_least8_t RxByteCounter;
+  uint_least8_t TxByteCounter;
+  ////////////////////////////////////////////////////////////
+  /// @brief The number of cycles that we have been in the
+  ///        reset state.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t ResetNumCycles;
+  ////////////////////////////////////////////////////////////
+  /// @brief The number of cycles we must stay in the reset
+  ///        state before transitioning back to the receiving
+  ///        state.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t ResetWaitCycles;
+  ////////////////////////////////////////////////////////////
+  /// @brief Number of bytes in the command packet
+  ////////////////////////////////////////////////////////////
+  uint_least8_t CommandPacketNumBytes;
+  ////////////////////////////////////////////////////////////
+  /// @brief Counter that ticks once a command packet has
+  ///        started to be received but hasn't finished being
+  ///        received.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t CountCmdPacketTransitTime;
+  ////////////////////////////////////////////////////////////
+  /// @brief Maximum amount of time (in number of cycles) to
+  ///        wait for a full command packet to be received.
+  ////////////////////////////////////////////////////////////
+  uint_least8_t MaxCmdPacketTransitTime;
 };
 
 #endif  // MICRO_COMM_CHANNEL_HH
