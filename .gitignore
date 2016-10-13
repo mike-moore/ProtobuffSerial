@@ -32,3 +32,4 @@
 testAll
 
 *.pb.*
+Examples/SimpleComm/simple_rcvr
