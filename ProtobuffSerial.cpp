@@ -12,6 +12,9 @@ ProtobuffSerial::~ProtobuffSerial() {
 
 int ProtobuffSerial::InitHw() {
 	Serial.begin(115200);
+    while (!Serial) {
+        ; // wait for serial port to connect. Needed for native USB
+    }
 	return SUCCESS;
 }
 

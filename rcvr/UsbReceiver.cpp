@@ -55,39 +55,6 @@ void UsbReceiver::RunComm()
     }
 }
 
-void UsbReceiver::Tx() {
-    /// - String used for error reporting
-    errorLocation = "UsbReceiver::Tx";
-    /// - Send the packet header.
-    write(CommPortHandle, &PacketHeader, 4);
-    usleep(1.0e6/(CommFrequency));
-    /// - Serialize the commands to a char array..
-    if (!Commands.SerializeToArray(TxBuffer, Commands.ByteSize())) {
-        errorOut.str("");
-        errorOut << "Error writing command packet to : " << PortName;
-        errorMessage = errorOut.str();
-        reportWarning();
-    }
-    /// - Now compute the number of times we will have to send 4 bytes down
-    ///   and the remainder bytes.
-    int numBytes = (int) (Commands.ByteSize());
-    for (int bytesSent = 0; bytesSent < numBytes; bytesSent += 4){
-        if((numBytes - bytesSent) >= 4)
-        {
-            write(CommPortHandle, &TxBuffer[bytesSent], 4);
-        }
-        else
-        {
-            write(CommPortHandle, &TxBuffer[bytesSent], numBytes - bytesSent);
-        }
-        usleep(1.0e6/(CommFrequency));
-    }
-    /// - Compute CRC32
-    uint32_t tx_crc32 = CommCrc32::crc32(TxBuffer, Commands.ByteSize(), 0);
-    /// - Filler bytes used to tack on the end of transmission if needed.
-    write(CommPortHandle, &tx_crc32, 4);
-}
-
 float UsbReceiver::clip(float n, float lower, float upper) {
   return std::max(lower, std::min(n, upper));
 }
