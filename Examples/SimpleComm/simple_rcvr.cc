@@ -6,8 +6,8 @@ UsbReceiver SimpleRcvr;
 int main( int argc, char *argv[] )
 {
     if (argc != 2){
-    	std::cout << "Improper usage of " << argv[0] << ". Usage: ./" << argv[0] << " /comm/port/to/use" << std::endl;
-    	std::cout << "Use the same comm port that is used by the Arduino IDE to upload code to the board. Something like /dev/tty*" << std::endl;
+    	std::cout << "Improper usage of " << argv[0] << ". Usage: " << argv[0] << " /comm/port/to/use" << std::endl;
+    	std::cout << "Use the same comm port that is used by the Arduino IDE to upload code to the board. Something like " << argv[0] << " /dev/ttyACMO" << std::endl;
     }else{
 	    /// - Connect to the Comm Port
 	    SimpleRcvr.CommFrequency = 100.0;

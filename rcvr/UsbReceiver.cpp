@@ -30,8 +30,7 @@ void UsbReceiver::RunComm()
     if(Connected && Active){
         /// - Transmit.
         Tx();
-        /// - Give the USB device time to respond (three frames is theoretical
-        ///   max amount of time needed).
+        /// - Give the USB device time to respond.
         WaitToRx();
         /// - Receive.
         Rx();

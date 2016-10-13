@@ -29,7 +29,6 @@ class ProtobuffSerial : public MicroCommChannel {
  protected:
   virtual int ReadPacket();
   virtual int WritePacket();
-  void WriteByte();
   virtual bool ValidCrc();
   uint_least8_t RxByteCounter;
   uint_least8_t TxByteCounter;

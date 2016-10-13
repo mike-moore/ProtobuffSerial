@@ -23,7 +23,7 @@ comm_packet:
 -include comm_packet
 
 simple_rcvr: $(OBJS)
-	$(CXX) main.cpp $(CXXFLAGS) $(INCS) -o $(EXE) $(OBJS) -lprotobuf
+	$(CXX) simple_rcvr.cc $(CXXFLAGS) $(INCS) -o $(EXE) $(OBJS) -lprotobuf
 
 clean:
 	rm -rf $(COMM_HOME)/*.pb.*

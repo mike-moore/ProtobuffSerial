@@ -106,8 +106,8 @@ void UnixSerialChannel::Connect() {
         Active = false;
         return;
 	}
-    /// - Set speed to 921,600 bps, 8n1 (no parity)
-	SetupSerialAttributes(B921600, 0);
+    /// - Set speed to 115,200 bps, 8n1 (no parity)
+	SetupSerialAttributes(B115200, 0);
 	/// - Set no blocking
 	ToggleBlocking(0);
     /// - Successfully connected... Set the Connected flag
@@ -225,7 +225,5 @@ bool UnixSerialChannel::ValidCrc(){
 }
 
 void UnixSerialChannel::reportWarning(){
-    #ifdef DEBUG_COMM
-        MessageHandler::warn(__FILE__, __LINE__, errorLocation.c_str(), errorMessage.c_str());
-    #endif
+    MessageHandler::warn(__FILE__, __LINE__, errorLocation.c_str(), errorMessage.c_str());
 }
