@@ -29,4 +29,6 @@
 *.app
 
 *.pyc
-test/testAll
+testAll
+
+*.pb.*
