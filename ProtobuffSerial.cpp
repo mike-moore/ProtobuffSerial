@@ -11,6 +11,14 @@ ProtobuffSerial::~ProtobuffSerial() {
 }
 
 int ProtobuffSerial::InitHw() {
+    /// - Require 3 frames to complete a comm reset.
+    ResetWaitCycles = (LoopFrequency/CommFrequency)*3;
+    CountCmdPacketTransitTime = 0;
+    /// - Compute the maximum time we will wait to received the full cmd packet.
+    uint_least8_t numTransits = (CommandPacketNumBytes / 4);
+    uint_least8_t remainderTransit = (CommandPacketNumBytes % 4 == 0) ? 0: 1;
+    MaxCmdPacketTransitTime = (numTransits+remainderTransit)*(LoopFrequency/CommFrequency);
+    
 	Serial.begin(115200);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB

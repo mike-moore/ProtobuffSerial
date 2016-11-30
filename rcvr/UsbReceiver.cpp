@@ -51,7 +51,7 @@ void UsbReceiver::RunComm()
         /// - Comm failure on PC side. Give the USB receiver time to detect it and reset its
         ///   own Tx and Rx buffers.
         CommFailureCounter++;
-        usleep(ResetWaitCycles * (1.0e6/CommFrequency));
+        sleep_ms(ResetWaitCycles * (1.0e3/CommFrequency));
     }
 }
 
@@ -60,5 +60,5 @@ float UsbReceiver::clip(float n, float lower, float upper) {
 }
 
 void UsbReceiver::WaitToRx() {
-    usleep(RxWaitCycles * (1.0e6/CommFrequency));
+    sleep_ms(RxWaitCycles * (1.0e3/CommFrequency));
 }

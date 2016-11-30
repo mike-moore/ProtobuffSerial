@@ -2,6 +2,7 @@
 #include "UsbReceiver.h"
 
 UsbReceiver SimpleRcvr;
+int NUM_TEST_PACKETS_TO_SEND = 500;
 
 void display_results(){
     if (!SimpleRcvr.CommFailure()){
@@ -21,25 +22,25 @@ int main( int argc, char *argv[] )
 {
     if (argc != 2){
     	std::cout << "Improper usage of " << argv[0] << ". Usage: " << argv[0] << " /comm/port/to/use" << std::endl;
-    	std::cout << "Use the same comm port that is used by the Arduino IDE to upload code to the board. Something like " << argv[0] << " /dev/ttyACMO" << std::endl;
+    	std::cout << "Use the same comm port that is used by the Arduino IDE to upload code to the board. Something like " << argv[0] << " /dev/ttyACM0" << std::endl;
     }else{
 	    /// - Connect to the Comm Port
-	    SimpleRcvr.CommFrequency = 100.0;
+	    SimpleRcvr.CommFrequency = 250;
 	    SimpleRcvr.PortName = argv[1];
 	    SimpleRcvr.Connect();
+	    int flipSign = 1;
+	    int sentPackets = 0;
 	    if (SimpleRcvr.Connected && SimpleRcvr.Active){
-		    /// - Send some sample command values
-		    SimpleRcvr.NormalizedVoltage = -0.67;
-		    /// - Call the run comm function.
-		    SimpleRcvr.RunComm();
-		    display_results(); // Telemtry values will still be positive until the next transfer
-		                       // 1 frame of comm delay between when a command is sent and when
-		                       // the sent back telemetry will reflect the Arduino's response.
-
-		    SimpleRcvr.RunComm(); // called twice to allow the simple control logic to execute 
-		                          // and effect a change in the telemetry
-
-		    display_results(); // Now the telemtry values will swap to negative.
+	    	while(sentPackets < NUM_TEST_PACKETS_TO_SEND){
+			    /// - Send some sample command values. Alternate the sign
+			    SimpleRcvr.NormalizedVoltage = 0.67*flipSign;
+			    SimpleRcvr.SecondCommand = 0.54*flipSign;
+			    /// - Call the run comm function.
+			    SimpleRcvr.RunComm();
+			    display_results();
+			    flipSign *= -1;
+			    sentPackets ++;
+	    	}
 	    }else{
 		    std::cout << "==================================================================" << std::endl;
 		    std::cout << " Failed to connect to the Arduino." << std::endl;

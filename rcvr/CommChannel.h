@@ -20,6 +20,14 @@
 #include "MessageHandler.h"
 #include <thread>
 
+#ifdef WIN32
+#include <windows.h>
+#elif _POSIX_C_SOURCE >= 199309L
+#include <time.h>   // for nanosleep
+#else
+#include <unistd.h> // for usleep
+#endif
+
 #define COMM_MAX_BUFF_SIZE 255
 #define MIN_COMM_FREQ 100.0e-6
 #define MAX_COMM_FREQ 100.0e6
@@ -69,6 +77,11 @@ class CommChannel {
   ////////////////////////////////////////////////////////////
   inline bool CommFailure() { return CommFailureFlag; }
   ////////////////////////////////////////////////////////////
+  /// @brief X-platform millisecond sleep function:
+  ///    http://stackoverflow.com/questions/1157209/is-there-an-alternative-sleep-function-in-c-to-milliseconds
+  ////////////////////////////////////////////////////////////
+  void sleep_ms(int milliseconds);
+  ////////////////////////////////////////////////////////////
   /// @brief Flag set upon succesfully connecting to the
   ///        device.
   ////////////////////////////////////////////////////////////
@@ -82,7 +95,7 @@ class CommChannel {
   ///        how long we sleep between a single bi-directional
   ///        communication frame.
   ////////////////////////////////////////////////////////////
-  float CommFrequency;
+  int CommFrequency;
   ////////////////////////////////////////////////////////////
   /// @brief Failed comm counter
   ////////////////////////////////////////////////////////////

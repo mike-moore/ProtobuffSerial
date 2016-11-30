@@ -4,7 +4,7 @@ CommChannel::CommChannel()
   :
   Connected(false),
   Active(false),
-  CommFrequency(50.0),
+  CommFrequency(50),
   CommFailureCounter(0),
   PacketHeader(0x534F4521),
   CommFailureFlag(false),
@@ -48,10 +48,10 @@ void CommChannel::TxAndRx()
     while(Connected && Active){
 	    /// - Transimt and then sleep half of a communication frame.
     	Tx();
-	    usleep(1.0e6/(2*CommFrequency)); // specified in micro seconds.
+	    sleep_ms(1.0e3/(2*CommFrequency)); // specified in milli seconds.
 	    /// - Receieve and then sleep half of a communication frame.
     	Rx();
-	    usleep(1.0e6/(2*CommFrequency));
+	    sleep_ms(1.0e3/(2*CommFrequency));
     }
 }
 
@@ -83,4 +83,18 @@ void CommChannel::ClearBuffers(){
 		TxBuffer[indx] = 0x00;
 		RxBuffer[indx] = 0x00;
 	}
+}
+
+void CommChannel::sleep_ms(int milliseconds) // cross-platform sleep function
+{
+#ifdef WIN32
+    Sleep(milliseconds);
+#elif _POSIX_C_SOURCE >= 199309L
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#else
+    usleep(milliseconds * 1000);
+#endif
 }
